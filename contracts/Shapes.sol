@@ -69,6 +69,24 @@ contract Shapes is ERC721, ERC721Burnable, Ownable {
   }
 
   // methods
+
+  function burnByTokenId(uint256 _tokenId) public returns (bool) {
+    super.burn(_tokenId); // burn the token that belongs to the msg.sender
+
+    shapeTypes[shapeTokens[_tokenId-1].shapeTypeId-1].supply -= 1; // decrease supply in shape type
+
+    ShapeType memory thisShapeType = shapeTypes[shapeTokens[_tokenId-1].shapeTypeId-1];
+
+    // return the ETH (if possible)
+    if (address(this).balance >= thisShapeType.priceWei) {
+      (bool sent, bytes memory data) = msg.sender.call{value: thisShapeType.priceWei}("");
+    }
+
+    emit TokenBurned(msg.sender, thisShapeType.symbol);
+
+    return true;
+  } 
+
   function getShapeTypeByIndex(uint _index) public view returns (uint, bytes32, bytes32, uint, uint, bool) {
     return (shapeTypes[_index].id, shapeTypes[_index].name, shapeTypes[_index].symbol, 
             shapeTypes[_index].supply, shapeTypes[_index].priceWei, shapeTypes[_index].active);
@@ -86,7 +104,7 @@ contract Shapes is ERC721, ERC721Burnable, Ownable {
     return shapeTypes.length;
   }
 
-  function mintByTokenTypeId(uint256 _id, bytes memory _data) public payable returns (bool) {
+  function mintByShapeTypeId(uint256 _id, bytes memory _data) public payable returns (bool) {
     // check if the token price is correct
     require(msg.value == shapeTypes[_id-1].priceWei, "Wrong amount of ETH sent.");
 

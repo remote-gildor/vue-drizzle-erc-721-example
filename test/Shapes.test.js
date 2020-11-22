@@ -46,7 +46,7 @@ contract("Shapes", accounts => {
     xit("reactivates an existing deactivated shape", async () => {
     });
 
-    it("mints a circle token with mintByTokenTypeId", async () => {
+    it("mints a circle token with mintByShapeTypeId", async () => {
       const tokenTypeId = 1; // circle
 
       // user's balance before the tx
@@ -58,7 +58,7 @@ contract("Shapes", accounts => {
       assert.equal(tokenTypeBefore[3], 0); // assert the circle supply is 0
 
       // mint/buy
-      const result = await instance.mintByTokenTypeId(
+      const result = await instance.mintByShapeTypeId(
         tokenTypeId, 
         web3.utils.hexToBytes("0x0000000000000000000000000000000000000000"), {
           from: accounts[0],
@@ -68,19 +68,19 @@ contract("Shapes", accounts => {
       );
       
       // gas used: 204656
-      // console.log("Gas used (mintByTokenTypeId) 1: " + result.receipt.gasUsed);
+      // console.log("Gas used (mintByShapeTypeId) 1: " + result.receipt.gasUsed);
 
       // user's balance after the tx
       let balanceAfter = await instance.balanceOf(accounts[0]);
       assert.equal(BN(balanceAfter), 1);
 
-      // check token supply before the minting
+      // check token supply after the minting
       const tokenTypeAfter = await instance.getShapeTypeByIndex(tokenTypeId-1);
       assert.equal(tokenTypeAfter[3], 1); // assert the circle supply is 1
 
     });
 
-    it("mints another circle token with mintByTokenTypeId", async () => {
+    it("mints another circle token with mintByShapeTypeId", async () => {
       const tokenTypeId = 1; // circle
 
       // user's balance before the tx
@@ -92,7 +92,7 @@ contract("Shapes", accounts => {
       assert.equal(tokenTypeBefore[3], 1); // assert the circle supply is 1
 
       // mint/buy
-      const result = await instance.mintByTokenTypeId(
+      const result = await instance.mintByShapeTypeId(
         tokenTypeId, 
         web3.utils.hexToBytes("0x0000000000000000000000000000000000000000"), {
           from: accounts[0],
@@ -102,13 +102,13 @@ contract("Shapes", accounts => {
       );
       
       // gas used: 203979
-      // console.log("Gas used (mintByTokenTypeId) 2: " + result.receipt.gasUsed);
+      // console.log("Gas used (mintByShapeTypeId) 2: " + result.receipt.gasUsed);
 
       // user's balance after the tx
       let balanceAfter = await instance.balanceOf(accounts[0]);
       assert.equal(BN(balanceAfter), 2);
 
-      // check token supply before the minting
+      // check token supply after the minting
       const tokenTypeAfter = await instance.getShapeTypeByIndex(tokenTypeId-1);
       assert.equal(tokenTypeAfter[3], 2); // assert the circle supply is 2
 
@@ -136,19 +136,62 @@ contract("Shapes", accounts => {
       );
       
       // gas used: 225312
-      console.log("Gas used (mintByTokenSymbol) 1: " + result.receipt.gasUsed);
+      // console.log("Gas used (mintByTokenSymbol) 1: " + result.receipt.gasUsed);
 
       // user's balance after the tx
       let balanceAfter = await instance.balanceOf(accounts[0]);
       assert.equal(BN(balanceAfter), 3);
 
-      // check token supply before the minting
+      // check token supply after the minting
       const tokenTypeAfter = await instance.getShapeTypeByIndex(tokenTypeId-1);
       assert.equal(tokenTypeAfter[3], 1); // assert the square supply is 1
 
     });
 
-    xit("allows token burn with burnByTokenId()", async () => {
+    it("allows token burn with burnByTokenId()", async () => {
+      const tokenTypeId = 1; // circle token ID
+      const tokenId = 2; // the second shape token minted (of the circle kind)
+
+      // user's ETH balance before the tx
+      const ethBalanceBefore = await web3.eth.getBalance(accounts[0]);
+
+      // user's token balance before the tx
+      let balanceBefore = await instance.balanceOf(accounts[0]);
+      assert.equal(BN(balanceBefore), 3); // three shape tokens minted before
+
+      // check token supply before burning
+      const tokenTypeBefore = await instance.getShapeTypeByIndex(tokenTypeId-1);
+      assert.equal(tokenTypeBefore[3], 2); // assert the circle supply is 2
+
+      // burn by token ID
+      const result = await instance.burnByTokenId(tokenId);
+
+      // gas used: 57076
+      // console.log("Gas used (burnByTokenId): " + result.receipt.gasUsed);
+      
+      // get gas price
+      const txData = await web3.eth.getTransaction(result.tx);
+      const gasPrice = txData.gasPrice;
+
+      // calculate if user's ETH balance correct
+      const ethBalanceAfter = await web3.eth.getBalance(accounts[0]);
+
+      let ethBefore = web3.utils.fromWei(ethBalanceBefore.toString(), "ether");
+      let ethAfter = web3.utils.fromWei(ethBalanceAfter.toString(), "ether");
+
+      let diffEth = ether(0.5)-(result.receipt.gasUsed*gasPrice); // ETH returned minus gas fee
+
+      assert.approximately(Number(ethAfter-ethBefore), 
+                           Number(web3.utils.fromWei(diffEth.toString(), "ether")), 
+                           0.000001);
+
+      // user's token balance after the tx
+      let balanceAfter = await instance.balanceOf(accounts[0]);
+      assert.equal(BN(balanceAfter), 2); // two shape tokens remaining after the burn
+
+      // check token supply after the burning
+      const tokenTypeAfter = await instance.getShapeTypeByIndex(tokenTypeId-1);
+      assert.equal(tokenTypeAfter[3], 1); // assert the circle supply is 1
     });
 
     xit("allows token burn with burnBySymbol()", async () => {
