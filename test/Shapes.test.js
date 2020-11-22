@@ -57,7 +57,7 @@ contract("Shapes", accounts => {
       const tokenTypeBefore = await instance.getShapeTypeByIndex(tokenTypeId-1);
       assert.equal(tokenTypeBefore[3], 0); // assert the circle supply is 0
 
-      // mint/buy
+      // mint
       const result = await instance.mintByShapeTypeId(
         tokenTypeId, 
         web3.utils.hexToBytes("0x0000000000000000000000000000000000000000"), {
@@ -214,10 +214,65 @@ contract("Shapes", accounts => {
 
   describe("Shapes transactions - failed", () => {
 
-    xit("fails at minting if value paid is incorrect", async () => {
+    it("fails at minting if value paid is incorrect", async () => {
+      const tokenTypeId = 1; // circle
+
+      // user's balance before the tx
+      let balanceBefore = await instance.balanceOf(accounts[0]);
+      assert.equal(BN(balanceBefore), 2);
+
+      // check token supply before the minting
+      const tokenTypeBefore = await instance.getShapeTypeByIndex(tokenTypeId-1);
+      assert.equal(tokenTypeBefore[3], 1); // assert the circle supply is 1 (one token was burned before)
+
+      // mint (should FAIL)
+      await expectRevert(
+        instance.mintByShapeTypeId(
+          tokenTypeId, 
+          web3.utils.hexToBytes("0x0000000000000000000000000000000000000000"), {
+            from: accounts[0],
+            gas: 3000000,
+            value: ether(0.1) // too low ETH value
+          }
+        ),
+        "Wrong amount of ETH sent."
+      );
+      
+      // user's balance after the tx (should stay the same)
+      let balanceAfter = await instance.balanceOf(accounts[0]);
+      assert.equal(BN(balanceAfter), 2);
+
+      // check token supply after the minting (should stay the same)
+      const tokenTypeAfter = await instance.getShapeTypeByIndex(tokenTypeId-1);
+      assert.equal(tokenTypeAfter[3], 1); // assert the circle supply is still 1
+
     });
 
-    xit("fails to burn token with balance/supply 0", async () => {
+    it("fails to burn a non-existing token (wrong ID)", async () => {
+      const tokenTypeId = 1; // circle token ID
+      const tokenId = 32; // this token ID does not exist
+
+      // user's token balance before the tx
+      let balanceBefore = await instance.balanceOf(accounts[0]);
+      assert.equal(BN(balanceBefore), 2); // two shape tokens minted before
+
+      // check token supply before burning
+      const tokenTypeBefore = await instance.getShapeTypeByIndex(tokenTypeId-1);
+      assert.equal(tokenTypeBefore[3], 1); // assert the circle supply is 1 (one token was burned before)
+
+      // burn by token ID (should FAIL)
+      await expectRevert(
+        instance.burnByTokenId(tokenId),
+        "ERC721: operator query for nonexistent token"
+      )
+
+      // user's token balance after the tx
+      let balanceAfter = await instance.balanceOf(accounts[0]);
+      assert.equal(BN(balanceAfter), 2); // two shape tokens remaining after the failed burn
+
+      // check token supply after the burning
+      const tokenTypeAfter = await instance.getShapeTypeByIndex(tokenTypeId-1);
+      assert.equal(tokenTypeAfter[3], 1); // assert the circle supply is still 1
     });
 
     xit("fails at trying to create an existing active shape", async () => {
