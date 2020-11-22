@@ -114,7 +114,7 @@ contract("Shapes", accounts => {
 
     });
 
-    it("it mints a square with mintBySymbol", async () => {
+    it("mints a square token with mintBySymbol", async () => {
       const tokenTypeId = 2; // square
 
       // user's balance before the tx
@@ -148,7 +148,7 @@ contract("Shapes", accounts => {
 
     });
 
-    it("allows token burn with burnByTokenId()", async () => {
+    it("burns a circle token with burnByTokenId()", async () => {
       const tokenTypeId = 1; // circle token ID
       const tokenId = 2; // the second shape token minted (of the circle kind)
 
@@ -192,9 +192,6 @@ contract("Shapes", accounts => {
       // check token supply after the burning
       const tokenTypeAfter = await instance.getShapeTypeByIndex(tokenTypeId-1);
       assert.equal(tokenTypeAfter[3], 1); // assert the circle supply is 1
-    });
-
-    xit("allows token burn with burnBySymbol()", async () => {
     });
 
     xit("allows owner to collect ETH", async () => {

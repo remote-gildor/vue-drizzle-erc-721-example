@@ -70,7 +70,7 @@ contract Shapes is ERC721, ERC721Burnable, Ownable {
 
   // methods
 
-  function burnByTokenId(uint256 _tokenId) public returns (bool) {
+  function burnByTokenId(uint256 _tokenId) public {
     super.burn(_tokenId); // burn the token that belongs to the msg.sender
 
     shapeTypes[shapeTokens[_tokenId-1].shapeTypeId-1].supply -= 1; // decrease supply in shape type
@@ -83,8 +83,6 @@ contract Shapes is ERC721, ERC721Burnable, Ownable {
     }
 
     emit TokenBurned(msg.sender, thisShapeType.symbol);
-
-    return true;
   } 
 
   function getShapeTypeByIndex(uint _index) public view returns (uint, bytes32, bytes32, uint, uint, bool) {
