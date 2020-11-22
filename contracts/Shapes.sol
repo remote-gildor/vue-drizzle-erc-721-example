@@ -164,4 +164,12 @@ contract Shapes is ERC721, ERC721Burnable, Ownable {
 
     return true;
   }
+
+  function ownerCollectEther() public onlyOwner {
+    uint balance = address(this).balance;
+
+    (bool sent, bytes memory data) = owner().call{value: balance}("");
+
+    emit EtherCollected(msg.sender, balance);
+  }
 }
