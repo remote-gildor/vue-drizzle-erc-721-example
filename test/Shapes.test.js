@@ -254,6 +254,38 @@ contract("Shapes", accounts => {
       assert.equal(addressBalanceAfter, 0);
     });
 
+    it("checks which tokens the user holds", async () => {
+      // mint another token
+      await instance.mintByShapeTypeId(
+        1, 
+        web3.utils.hexToBytes("0x0000000000000000000000000000000000000000"), {
+          from: accounts[0],
+          gas: 3000000,
+          value: ether(0.5)
+        }
+      );
+
+      // the amount of tokens the user holds
+      let balanceAmount = await instance.balanceOf(accounts[0]);
+      assert.equal(BN(balanceAmount), 3); // three tokens
+
+      // first token
+      let firstToken = await instance.tokenOfOwnerByIndex(accounts[0], 0);
+      assert.equal(BN(firstToken), 1); // the first token ID is 1
+
+      // second token
+      let secondToken = await instance.tokenOfOwnerByIndex(accounts[0], 1);
+      assert.equal(BN(secondToken), 3); // the second token ID is 3 (token with ID 2 was burned)
+
+      // third token
+      let thirdToken = await instance.tokenOfOwnerByIndex(accounts[0], 2);
+      assert.equal(BN(thirdToken), 4); // the third token ID is 4
+
+      // get shape type ID for a token (based on the token ID)
+      let shapeTypeId = await instance.getShapeTypeIdOfToken(secondToken); // second token is square
+      assert.equal(BN(shapeTypeId), 2); // square's ShapeType ID is 2
+    });
+
   });
 
   describe("Shapes transactions - failed", () => {
@@ -263,11 +295,11 @@ contract("Shapes", accounts => {
 
       // user's balance before the tx
       let balanceBefore = await instance.balanceOf(accounts[0]);
-      assert.equal(BN(balanceBefore), 2);
+      assert.equal(BN(balanceBefore), 3);
 
       // check token supply before the minting
       const tokenTypeBefore = await instance.getShapeTypeByIndex(tokenTypeId-1);
-      assert.equal(tokenTypeBefore[3], 1); // assert the circle supply is 1 (one token was burned before)
+      assert.equal(tokenTypeBefore[3], 2); // assert the circle supply is 2 (one token was burned before)
 
       // mint (should FAIL)
       await expectRevert(
@@ -284,11 +316,11 @@ contract("Shapes", accounts => {
       
       // user's balance after the tx (should stay the same)
       let balanceAfter = await instance.balanceOf(accounts[0]);
-      assert.equal(BN(balanceAfter), 2);
+      assert.equal(BN(balanceAfter), 3);
 
       // check token supply after the minting (should stay the same)
       const tokenTypeAfter = await instance.getShapeTypeByIndex(tokenTypeId-1);
-      assert.equal(tokenTypeAfter[3], 1); // assert the circle supply is still 1
+      assert.equal(tokenTypeAfter[3], 2); // assert the circle supply is still 2
 
     });
 
@@ -298,11 +330,11 @@ contract("Shapes", accounts => {
 
       // user's token balance before the tx
       let balanceBefore = await instance.balanceOf(accounts[0]);
-      assert.equal(BN(balanceBefore), 2); // two shape tokens minted before
+      assert.equal(BN(balanceBefore), 3); // 3 shape tokens minted before
 
       // check token supply before burning
       const tokenTypeBefore = await instance.getShapeTypeByIndex(tokenTypeId-1);
-      assert.equal(tokenTypeBefore[3], 1); // assert the circle supply is 1 (one token was burned before)
+      assert.equal(tokenTypeBefore[3], 2); // assert the circle supply is 2 (one token was burned before)
 
       // burn by token ID (should FAIL)
       await expectRevert(
@@ -312,11 +344,11 @@ contract("Shapes", accounts => {
 
       // user's token balance after the tx
       let balanceAfter = await instance.balanceOf(accounts[0]);
-      assert.equal(BN(balanceAfter), 2); // two shape tokens remaining after the failed burn
+      assert.equal(BN(balanceAfter), 3); // 3 shape tokens remaining after the failed burn
 
       // check token supply after the burning
       const tokenTypeAfter = await instance.getShapeTypeByIndex(tokenTypeId-1);
-      assert.equal(tokenTypeAfter[3], 1); // assert the circle supply is still 1
+      assert.equal(tokenTypeAfter[3], 2); // assert the circle supply is still 2
     });
 
     it("fails at trying to create an existing active shape type", async () => {

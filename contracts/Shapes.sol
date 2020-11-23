@@ -58,8 +58,8 @@ contract Shapes is ERC721, ERC721Burnable, Ownable {
 
     ShapeType memory triangle = ShapeType({
       id: 3,
-      name: "triangle",
-      symbol: "TRG",
+      name: "cloud",
+      symbol: "CLD",
       supply: 0,
       priceWei: 330000000000000000, // 0.33 ETH
       active: true
@@ -118,7 +118,12 @@ contract Shapes is ERC721, ERC721Burnable, Ownable {
     emit ShapeTypeDeactivated(msg.sender, shapeTypes[_id-1].symbol);
   }
 
-  function getShapeTypeByIndex(uint _index) public view returns (uint, bytes32, bytes32, uint, uint, bool) {
+  function getShapeTypeIdOfToken(uint _tokenId) public view returns (uint typeId) {
+    return shapeTokens[_tokenId-1].shapeTypeId;
+  }
+
+  function getShapeTypeByIndex(uint _index) public view returns (uint typeId, bytes32 name, bytes32 symbol, 
+                                                                 uint supply, uint price, bool active) {
     return (shapeTypes[_index].id, shapeTypes[_index].name, shapeTypes[_index].symbol, 
             shapeTypes[_index].supply, shapeTypes[_index].priceWei, shapeTypes[_index].active);
   }
@@ -143,10 +148,7 @@ contract Shapes is ERC721, ERC721Burnable, Ownable {
     require(shapeTypes[_id-1].active == true, "The selected shape type is deactivated.");
 
     // set a new token id
-    uint tokenId = 0;
-    if (shapeTokens.length > 0) {
-      tokenId = shapeTokens[shapeTokens.length-1].id + 1;
-    }
+    uint tokenId = shapeTokens.length + 1;
 
     // create a shape token and store it in the tokens array
     shapeTokens.push(ShapeToken({
@@ -178,10 +180,7 @@ contract Shapes is ERC721, ERC721Burnable, Ownable {
     require(someShapeType.active == true, "The selected shape is deactivated.");
 
     // set a new token id
-    uint tokenId = 0;
-    if (shapeTokens.length > 0) {
-      tokenId = shapeTokens[shapeTokens.length-1].id + 1;
-    }
+    uint tokenId = shapeTokens.length + 1;
 
     // create a shape token and store it in the tokens array
     shapeTokens.push(ShapeToken({

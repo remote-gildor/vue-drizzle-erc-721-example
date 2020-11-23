@@ -20,17 +20,17 @@
                 </b-col>
             </b-row>
 
-            <div v-if="getUserShapes.length > 0">
+            <div v-if="getTokensShapeData.length > 0">
                 <hr>
 
-                <h3 class="text-center mt-3">My NFTs</h3>
+                <h3 class="text-center mt-3">My ERC-721 tokens</h3>
             </div>
 
             <b-card-group deck class="row mt-4 text-center">
-                <b-col md="4" v-for="shape in getUserShapes" :key="shape.symbol"> 
+                <b-col md="4" v-for="shape in getTokensShapeData" :key="shape.tokenId"> 
                         <b-card header-tag="header" footer-tag="footer">
                             <template #header>
-                                <h6 class="mb-1">Shape</h6>
+                                <h6 class="mb-1">Shape #{{shape.tokenId}}</h6>
                             </template>
 
                             <b-card-title>{{shape.name}} ({{shape.symbol}})</b-card-title>
@@ -40,12 +40,8 @@
                             </b-card-text>
 
                             <b-button href="#" variant="danger" @click="burnShape(shape)">
-                                Burn 1 {{shape.symbol}}
+                                Burn
                             </b-button>
-
-                            <template #footer>
-                                <em>My balance: {{shape.userBalance}} {{shape.symbol}}</em>
-                            </template>
                         </b-card>
                 </b-col>
             </b-card-group>
@@ -56,7 +52,7 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
+import { mapGetters } from 'vuex';
 import Gravatar from "vue-gravatar";
 
 export default {
@@ -68,44 +64,41 @@ export default {
         ...mapGetters("accounts", ["activeAccount", "activeBalance"]),
         ...mapGetters("drizzle", ["isDrizzleInitialized", "drizzleInstance"]),
         ...mapGetters('contracts', ['getContractData', 'contractInstances']),
-        ...mapGetters("minter", ["getAllShapes"]),
+        ...mapGetters("minter", ["getAllShapeTypes"]),
+        ...mapGetters('profile', ['getUserShapeTokens']),
 
-        userAccount() {
-            return this.activeAccount
-        },
         getEthBalance() {
             return this.drizzleInstance.web3.utils.fromWei(this.activeBalance, "ether");
         },
-        getUserShapes() {
-            let userShapes = [];
-            for (let shape of this.getAllShapes) {
-                if (shape.userBalance > 0) {
-                    userShapes.push(shape);
+        getTokensShapeData() {
+            let tokensList = [];
+            for (let shapeToken of this.getUserShapeTokens) {
+                for (let shapeType of this.getAllShapeTypes) {
+                    if (shapeType.typeId === shapeToken.typeId) {
+                        tokensList.push({
+                            tokenId: shapeToken.tokenId,
+                            typeId: shapeType.typeId,
+                            name: shapeType.name,
+                            symbol: shapeType.symbol,
+                            priceWei: shapeType.priceWei,
+                            priceEth: shapeType.priceEth,
+                            supply: shapeType.supply,
+                            active: shapeType.active
+                        });
+                    }
                 }
             }
-            return userShapes; 
+            return tokensList; 
+        },
+        userAccount() {
+            return this.activeAccount
         }
     },
     created() {
-        this.$store.dispatch("minter/fetchAllShapes");
+        this.$store.dispatch("minter/fetchAllShapeTypes");
+        this.$store.dispatch("profile/fetchUserShapeTokens");
     },
     methods: {
-        ...mapActions("minter", ["fetchAllShapes"]),
-        ...mapActions("profile", ["burnShape"]),
-
-        call(contract, method, args) {
-            let key = this.drizzleInstance.contracts[contract].methods[method].cacheCall(...args)
-            let value;
-
-            try {
-                value = this.contractInstances[contract][method][key].value;
-            } catch (error) {
-                value = null;
-            }
-            
-            return value;
-        },
-
         burnShape(shape) {
             this.drizzleInstance.contracts["Shapes"].methods["burnByTokenId"].cacheSend(shape.tokenId);
         }

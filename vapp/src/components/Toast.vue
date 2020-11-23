@@ -18,21 +18,21 @@ export default {
         if (eventName === 'TokenMinted') {
           let symbol = this.drizzleInstance.web3.utils.hexToUtf8(data._symbol);
           display = "You have just bought 1 " + symbol + "! 🤑";
-          this.$store.dispatch("minter/fetchAllShapes");
+          this.$store.dispatch("minter/fetchAllShapeTypes");
           this.$store.dispatch("admin/fetchContractEthBalance");
         } else if (eventName === 'TokenBurned') {
           let symbol = this.drizzleInstance.web3.utils.hexToUtf8(data._symbol);
           display = "You have just burned 1 " + symbol + "! 🔥😮";
-          this.$store.dispatch("minter/fetchAllShapes");
+          this.$store.dispatch("minter/fetchAllShapeTypes");
           this.$store.dispatch("admin/fetchContractEthBalance");
         } else if (eventName === 'ShapeAdded') {
           let symbol = this.drizzleInstance.web3.utils.hexToUtf8(data._symbol);
           display = "Admin has added a new shape with a symbol " + symbol + ". 🆕";
-          this.$store.dispatch("minter/fetchAllShapes");
+          this.$store.dispatch("minter/fetchAllShapeTypes");
         } else if (eventName === 'ShapeDeactivated') {
           let symbol = this.drizzleInstance.web3.utils.hexToUtf8(data._symbol);
           display = "Admin has deactivated the " + symbol + " shape. 🛑";
-          this.$store.dispatch("minter/fetchAllShapes");
+          this.$store.dispatch("minter/fetchAllShapeTypes");
         } else if (eventName === 'EtherCollected') {
           let collectedEth = this.drizzleInstance.web3.utils.fromWei(data._balance, "ether");
           display = "Admin has collected " + collectedEth + " ETH. 💰";

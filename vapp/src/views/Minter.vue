@@ -14,10 +14,10 @@
     </b-row>
 
     <b-card-group deck class="row">
-      <b-col md="4" class="text-center mt-3" v-for="shape in getActiveShapes()" :key="shape.symbol"> 
+      <b-col md="4" class="text-center mt-3" v-for="shape in getActiveShapeTypes()" :key="shape.symbol"> 
         <b-card header-tag="header" footer-tag="footer">
           <template #header>
-            <h6 class="mb-0">Shape</h6>
+            <h6 class="mb-0">Shape Type</h6>
           </template>
 
           <b-card-title>{{shape.name}} ({{shape.symbol}})</b-card-title>
@@ -26,7 +26,7 @@
             <b-icon :icon="shape.name" animation="fade" variant="primary" font-scale="5"></b-icon>
           </b-card-text>
 
-          <b-button href="#" variant="primary" @click="mintShape(shape)">
+          <b-button href="#" variant="primary" @click="mintShapeType(shape)">
             Mint for {{shape.priceEth}} ETH
           </b-button>
 
@@ -51,21 +51,21 @@ export default {
     computed: {
       ...mapGetters("accounts", ["activeAccount", "activeBalance"]),
       ...mapGetters("drizzle", ["isDrizzleInitialized", "drizzleInstance"]),
-      ...mapGetters("minter", ["getAllShapes"]),
+      ...mapGetters("minter", ["getAllShapeTypes"]),
     },
     methods: {
-      getActiveShapes() {
-        let activeShapes = [];
-        for (let shape of this.getAllShapes) {
+      getActiveShapeTypes() {
+        let activeShapeTypes = [];
+        for (let shape of this.getAllShapeTypes) {
           if (shape.active) {
-            activeShapes.push(shape);
+            activeShapeTypes.push(shape);
           }
         }
-        return activeShapes; 
+        return activeShapeTypes; 
       },
-      mintShape(shape) {
-        this.drizzleInstance.contracts['Shapes'].methods['mintByTokenId'].cacheSend(
-          shape.tokenId, 
+      mintShapeType(shape) {
+        this.drizzleInstance.contracts['Shapes'].methods['mintByShapeTypeId'].cacheSend(
+          shape.typeId, 
           this.drizzleInstance.web3.utils.hexToBytes("0x0000000000000000000000000000000000000000"), 
           {
             from: this.activeAccount,
@@ -75,7 +75,7 @@ export default {
       }
     },
     created() {
-      this.$store.dispatch("minter/fetchAllShapes");
+      this.$store.dispatch("minter/fetchAllShapeTypes");
     }
 }
 </script>

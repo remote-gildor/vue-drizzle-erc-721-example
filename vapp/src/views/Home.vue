@@ -10,7 +10,7 @@
         </b-jumbotron>
         </div>
 
-        <div v-else>Loading...</div>
+        <div v-else>Loading...</div> 
     </div>
 </template>
 
