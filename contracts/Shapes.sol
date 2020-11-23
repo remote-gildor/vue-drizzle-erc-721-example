@@ -69,6 +69,34 @@ contract Shapes is ERC721, ERC721Burnable, Ownable {
   }
 
   // methods
+  function addNewShapeType(bytes32 _name, bytes32 _symbol, uint _price) public onlyOwner {
+    // check if shape type with that symbol already exists
+    ShapeType memory someShape = getShapeTypeBySymbol(_symbol);
+
+    if (someShape.id > 0) { // if shape type ID > 0, then shape type exists
+      if (someShape.active) { // if the existing shape type is active, revert the whole tx
+        revert("A ShapeType with this symbol already exists.");
+      } else { // if the existing shape type is not active, re-activate it
+        shapeTypes[someShape.id-1].active = true;
+        return;
+      }
+    }
+
+    // else create a new shape type
+    ShapeType memory shape = ShapeType(
+      shapeTypes.length+1,
+      _name, 
+      _symbol,
+      0, // supply
+      _price,
+      true // active
+    );
+
+    shapeTypes.push(shape);
+
+    emit ShapeTypeAdded(msg.sender, shape.symbol);
+
+  }
 
   function burnByTokenId(uint256 _tokenId) public {
     super.burn(_tokenId); // burn the token that belongs to the msg.sender

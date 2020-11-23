@@ -35,15 +35,29 @@ contract("Shapes", accounts => {
 
   });
 
-  describe("Shapes transactions - successful", () => {
+  describe("Shape transactions - successful", () => {
 
-    xit("allows adding a new shape", async () => {
+    it("adds a new shape type", async () => {
+      const lengthBefore = await instance.getShapeTypesArrayLength();
+      assert.equal(BN(lengthBefore), 3);
+
+      await instance.addNewShapeType(
+        web3.utils.asciiToHex("cube"),
+        web3.utils.asciiToHex("CBE"),
+        ether(0.666)
+      );
+
+      const lengthAfter = await instance.getShapeTypesArrayLength();
+      assert.equal(BN(lengthAfter), 4);
+
+      const newShape = await instance.getShapeTypeByIndex(3);
+      assert.equal(web3.utils.hexToUtf8(newShape[1]), "cube"); // check if shape name correct
     });
 
-    xit("deactivates a shape", async () => {
+    xit("deactivates a shape type", async () => {
     });
 
-    xit("reactivates an existing deactivated shape", async () => {
+    xit("reactivates an existing deactivated shape type", async () => {
     });
 
     it("mints a circle token with mintByShapeTypeId", async () => {
@@ -67,7 +81,7 @@ contract("Shapes", accounts => {
         }
       );
       
-      // gas used: 204656
+      // gas used: 204656 (for 100 GWei gas price, this means 0.0204656 ETH spent)
       // console.log("Gas used (mintByShapeTypeId) 1: " + result.receipt.gasUsed);
 
       // user's balance after the tx
