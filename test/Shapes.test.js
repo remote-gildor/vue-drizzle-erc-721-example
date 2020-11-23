@@ -54,10 +54,40 @@ contract("Shapes", accounts => {
       assert.equal(web3.utils.hexToUtf8(newShape[1]), "cube"); // check if shape name correct
     });
 
-    xit("deactivates a shape type", async () => {
+    it("deactivates a shape type", async () => {
+      // fetch a shape with type ID 2 (square)
+      const typeId = 2;
+
+      const squareBefore = await instance.getShapeTypeByIndex(typeId-1);
+      assert.equal(web3.utils.hexToUtf8(squareBefore[1]), "square"); // get shape type name
+      assert.equal(squareBefore[5], true); // assert the shape type is active
+
+      // deactivate the shape type
+      await instance.deactivateShapeTypeById(typeId);
+
+      // check if the shape type is really deactivated
+      const squareAfter = await instance.getShapeTypeByIndex(typeId-1);
+      assert.equal(squareAfter[5], false); // assert the shape type is deactivated
     });
 
-    xit("reactivates an existing deactivated shape type", async () => {
+    it("reactivates an existing deactivated shape type", async () => {
+      // fetch a shape with type ID 2 (square)
+      const typeId = 2;
+
+      const squareBefore = await instance.getShapeTypeByIndex(typeId-1);
+      assert.equal(web3.utils.hexToUtf8(squareBefore[1]), "square"); // get shape type name
+      assert.equal(squareBefore[5], false); // assert the shape type is active
+
+      // deactivate the shape type
+      await instance.addNewShapeType(
+        web3.utils.asciiToHex("square"),
+        web3.utils.asciiToHex("SQR"),
+        ether(1.2)
+      );
+
+      // check if the shape type is really deactivated
+      const squareAfter = await instance.getShapeTypeByIndex(typeId-1);
+      assert.equal(squareAfter[5], true); // assert the shape type is deactivated
     });
 
     it("mints a circle token with mintByShapeTypeId", async () => {

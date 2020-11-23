@@ -113,6 +113,11 @@ contract Shapes is ERC721, ERC721Burnable, Ownable {
     emit TokenBurned(msg.sender, thisShapeType.symbol);
   } 
 
+  function deactivateShapeTypeById(uint _id) public onlyOwner {
+    shapeTypes[_id-1].active = false;
+    emit ShapeTypeDeactivated(msg.sender, shapeTypes[_id-1].symbol);
+  }
+
   function getShapeTypeByIndex(uint _index) public view returns (uint, bytes32, bytes32, uint, uint, bool) {
     return (shapeTypes[_index].id, shapeTypes[_index].name, shapeTypes[_index].symbol, 
             shapeTypes[_index].supply, shapeTypes[_index].priceWei, shapeTypes[_index].active);
