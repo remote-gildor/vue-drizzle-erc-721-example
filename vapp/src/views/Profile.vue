@@ -27,16 +27,19 @@
             </div>
 
             <b-card-group deck class="row mt-4 text-center">
-                <b-col md="4" v-for="shape in getTokensShapeData" :key="shape.tokenId"> 
+                <b-col class="mt-3" md="4" v-for="shape in getTokensShapeData" :key="shape.tokenId"> 
                         <b-card header-tag="header" footer-tag="footer">
                             <template #header>
-                                <h6 class="mb-1">Shape #{{shape.tokenId}}</h6>
+                                <h6 class="mb-1">
+                                    Shape #{{shape.tokenId}} 
+                                    <b-badge v-if="!shape.active" variant="danger">deactivated</b-badge>
+                                    </h6>
                             </template>
 
                             <b-card-title>{{shape.name}} ({{shape.symbol}})</b-card-title>
 
                             <b-card-text class="m-4">
-                                <b-icon :icon="shape.name" animation="fade" variant="primary" font-scale="5"></b-icon>
+                                <b-icon :icon="shape.name" animation="fade" :variant="shape.active ? 'primary' : 'danger'" font-scale="5"></b-icon>
                             </b-card-text>
 
                             <b-button href="#" variant="danger" @click="burnShape(shape)">
