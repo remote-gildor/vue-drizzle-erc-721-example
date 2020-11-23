@@ -319,10 +319,29 @@ contract("Shapes", accounts => {
       assert.equal(tokenTypeAfter[3], 1); // assert the circle supply is still 1
     });
 
-    xit("fails at trying to create an existing active shape", async () => {
+    it("fails at trying to create an existing active shape type", async () => {
+      const lengthBefore = await instance.getShapeTypesArrayLength();
+      assert.equal(BN(lengthBefore), 4); // 4 because some previous test created a new shape type (cube)
+
+      await expectRevert(
+        instance.addNewShapeType(
+          web3.utils.asciiToHex("square"),
+          web3.utils.asciiToHex("SQR"),
+          ether(1.2)
+        ),
+        "A ShapeType with this symbol already exists"
+      )
+
+      const lengthAfter = await instance.getShapeTypesArrayLength();
+      assert.equal(BN(lengthAfter), 4); // no new shape type was created
     });
   
-    xit("fails at deactivating a non-existing shape", async () => {
+    it("fails at deactivating a non-existing shape type", async () => {
+      // deactivate a non-existing shape type with ID 42
+      await expectRevert(
+        instance.deactivateShapeTypeById(42),
+        "invalid opcode"
+      )
     });
 
   });
