@@ -23,7 +23,7 @@
       <!-- ADD A NEW SHAPE -->
       <b-row class="mt-2">
         <b-col md="4" offset-md="4" class="text-center">
-          <b-card title="Add new shape">
+          <b-card title="Add new shape type">
             <b-form @submit.prevent="addNewShape">
               <b-form-group>
 
@@ -32,7 +32,7 @@
                     v-model="addShapeName" 
                     type="text" 
                     required 
-                    placeholder="E.g. Square"
+                    placeholder="E.g. square"
                     trim
                   >
                   </b-form-input>
@@ -70,7 +70,7 @@
       <!-- DEACTIVATE A SHAPE -->
       <b-row class="mt-2">
         <b-col md="4" offset-md="4" class="text-center">
-          <b-card title="Deactivate a Shape">
+          <b-card title="Deactivate a ShapeType">
             <b-form @submit.prevent="deactivateShape">
               <b-form-group>
 
@@ -123,6 +123,7 @@ export default {
     ...mapGetters("contracts", ["getContractData"]),
     ...mapGetters("drizzle", ["isDrizzleInitialized", "drizzleInstance"]),
     ...mapGetters("admin", ["getContractEthBalance"]),
+    ...mapGetters("minter", ["getAllShapeTypes"]),
 
     isActiveUserAdmin() {
         let owner = this.getContractData({
@@ -146,6 +147,7 @@ export default {
       methodArgs: []
     });
 
+    this.$store.dispatch("minter/fetchAllShapeTypes");
     this.$store.dispatch("admin/fetchContractEthBalance");
   },
   data() { 
@@ -158,7 +160,7 @@ export default {
   },
   methods: {
     addNewShape() {
-      this.drizzleInstance.contracts['Shapes'].methods['addNewShape'].cacheSend(
+      this.drizzleInstance.contracts['Shapes'].methods['addNewShapeType'].cacheSend(
         this.drizzleInstance.web3.utils.asciiToHex(this.addShapeName),
         this.drizzleInstance.web3.utils.asciiToHex(this.addShapeSymbol),
         this.drizzleInstance.web3.utils.toWei(this.addShapePrice, 'ether')
@@ -168,9 +170,20 @@ export default {
       this.drizzleInstance.contracts['Shapes'].methods['ownerCollectEther'].cacheSend();
     },
     deactivateShape() {
-      this.drizzleInstance.contracts['Shapes'].methods['deactivateShapeBySymbol'].cacheSend(
-        this.drizzleInstance.web3.utils.asciiToHex(this.deactivateShapeSymbol)
+      this.drizzleInstance.contracts['Shapes'].methods['deactivateShapeTypeById'].cacheSend(
+        this.getShapeTypeId(this.deactivateShapeSymbol)
       );
+    },
+    getShapeTypeId(symbol) {
+      let shapeId = null;
+
+      for (let shape of this.getAllShapeTypes) {
+        if (shape.symbol === symbol) {
+          shapeId = shape.typeId; 
+        }
+      }
+
+      return shapeId; 
     }
   }
 }

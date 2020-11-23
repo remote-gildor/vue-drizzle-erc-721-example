@@ -14,9 +14,6 @@ const actions = {
     let web3 = drizzleInstance.web3;
     let contractAddress = drizzleInstance.contracts.Shapes.address;
 
-    window.console.log(contractAddress);
-    window.console.log(drizzleInstance.contracts.Shapes);
-
     let balanceWei = await web3.eth.getBalance(contractAddress);
     let balance = web3.utils.fromWei(balanceWei, "ether");
 
