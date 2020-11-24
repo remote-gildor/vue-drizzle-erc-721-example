@@ -1,7 +1,5 @@
 # An ERC-721 example made with Truffle, Drizzle, and Vue
 
-> **Important:** The project is under heavy development and not completed yet. See the TODO below for more information.
-
 An ERC-721 where the NFT token can be separated into multiple categories (shapes):
 
 - circles
@@ -19,15 +17,17 @@ This project uses the [OpenZeppelin ERC-721 implementation](https://github.com/O
 
 ### Minter page
 
-...
+![](assets/img/minter.png)
 
 ### Profile page
 
-...
+![](assets/img/profile-1.png)
+
+![](assets/img/profile-2.png)
 
 ### Admin page
 
-...
+![](assets/img/admin.png)
 
 ## Setup
 
@@ -152,9 +152,3 @@ npm run test:unit
 ```
 
 An example test is already created (`home.spec.js`). As you can see, there needs to be a **mock** Vue Store (see `helpers/storeHelper.js`). The Vue tests cannot connect to Ganache (if you've figured out the opposite, please open an issue in this repo).
-
-## TODO
-
-- Shapes.sol smart contract
-- Solidity tests
-- Vue.js dApp
